@@ -1,0 +1,809 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fußball Imposter</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#1a4a2e;min-height:100vh;overflow-x:hidden}
+:root{
+  --green-dark:#0f2d1a;
+  --green-mid:#1a4a2e;
+  --green-field:#2d6a4f;
+  --green-light:#40916c;
+  --green-bright:#52b788;
+  --white:#ffffff;
+  --yellow:#ffd60a;
+  --red:#e63946;
+  --gold:#f4a261;
+  --shadow:rgba(0,0,0,0.4);
+}
+
+.app{min-height:100vh;background:linear-gradient(160deg,#0f2d1a 0%,#1a4a2e 40%,#2d6a4f 100%);position:relative;overflow:hidden}
+.app::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(0deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 80px);pointer-events:none}
+
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;position:relative;z-index:1}
+
+.title-badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:6px 16px;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:2px;color:rgba(255,255,255,0.6);text-transform:uppercase;margin-bottom:12px}
+
+h1{font-family:'Oswald',sans-serif;font-size:48px;font-weight:700;color:#fff;text-align:center;line-height:1;margin-bottom:4px;text-shadow:0 2px 20px rgba(0,0,0,0.5)}
+h1 span{color:var(--yellow)}
+
+.subtitle{font-size:14px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:32px}
+
+.card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:24px;width:100%;max-width:360px;margin-bottom:16px;backdrop-filter:blur(4px)}
+
+.label{font-size:11px;font-family:'Oswald',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:12px}
+
+.stepper{display:flex;align-items:center;gap:0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.15)}
+.stepper button{background:rgba(255,255,255,0.08);border:none;color:#fff;font-size:22px;width:52px;height:52px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.stepper button:hover{background:rgba(255,255,255,0.15)}
+.stepper .val{flex:1;text-align:center;font-family:'Oswald',sans-serif;font-size:28px;font-weight:600;color:#fff;background:rgba(255,255,255,0.04)}
+
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-btn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 8px;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:.5px;color:rgba(255,255,255,0.7);cursor:pointer;transition:all .15s;text-align:center;line-height:1.3}
+.cat-btn:hover{background:rgba(255,255,255,0.12)}
+.cat-btn.active{background:rgba(255,214,10,0.15);border-color:var(--yellow);color:var(--yellow)}
+
+.mode-card{cursor:pointer;text-align:left;transition:all .18s ease;display:flex;gap:18px;align-items:center}
+.mode-card:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
+.mode-card.active{border-color:var(--yellow);background:rgba(255,214,10,0.09);box-shadow:0 0 24px rgba(255,214,10,0.12)}
+.mode-card .mode-icon{flex-shrink:0;font-size:42px;line-height:1;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.35))}
+.mode-card .label{margin-bottom:6px;font-size:16px;letter-spacing:1px}
+.mode-card p{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.5;margin:0}
+
+.name-input-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.name-input-row:last-child{margin-bottom:0}
+.name-input-row label{font-size:13px;font-family:'Oswald',sans-serif;letter-spacing:.5px;color:rgba(255,255,255,0.45);width:74px;flex-shrink:0}
+.name-input{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:11px 14px;color:#fff;font-size:15px;font-family:'Inter',sans-serif}
+.name-input::placeholder{color:rgba(255,255,255,0.3)}
+.name-input:focus{outline:none;border-color:var(--yellow);background:rgba(255,255,255,0.12)}
+
+.btn-primary{width:100%;max-width:360px;padding:18px;background:var(--yellow);border:none;border-radius:16px;font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;color:#0f2d1a;cursor:pointer;transition:all .15s;text-transform:uppercase}
+.btn-primary:hover{background:#ffe033;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(1px)}
+
+.btn-secondary{width:100%;max-width:360px;padding:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:16px;font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;letter-spacing:.5px;color:#fff;cursor:pointer;transition:all .15s}
+.btn-secondary:hover{background:rgba(255,255,255,0.15)}
+
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#ff4d5a}
+
+.player-indicator{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.pip{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2)}
+.pip.done{background:var(--green-bright)}
+.pip.current{background:var(--yellow);box-shadow:0 0 8px var(--yellow)}
+
+.role-card{position:relative;text-align:center;width:100%;max-width:380px;padding:40px 26px;border-radius:28px;border:1.5px solid rgba(255,255,255,0.12);background:linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));box-shadow:0 16px 50px rgba(0,0,0,0.3);overflow:hidden}
+.role-card::before{content:"";position:absolute;inset:0;border-radius:28px;opacity:.5;pointer-events:none;background:radial-gradient(circle at 50% -10%,var(--glow,transparent),transparent 60%)}
+.role-card.normal{--glow:rgba(82,183,136,0.35);border-color:rgba(82,183,136,0.35)}
+.role-card.imposter{--glow:rgba(230,57,70,0.4);border-color:rgba(230,57,70,0.4)}
+.role-icon-big{position:relative;display:block;font-size:64px;line-height:1;margin-bottom:14px;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.4))}
+.role-tag{position:relative;display:inline-block;padding:6px 20px;border-radius:50px;font-size:13px;font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:18px}
+.role-tag.normal{background:rgba(82,183,136,0.18);color:var(--green-bright);border:1.5px solid rgba(82,183,136,0.45);box-shadow:0 0 20px rgba(82,183,136,0.15)}
+.role-tag.imposter{background:rgba(230,57,70,0.18);color:var(--red);border:1.5px solid rgba(230,57,70,0.45);box-shadow:0 0 20px rgba(230,57,70,0.15)}
+.role-term{position:relative;font-family:'Oswald',sans-serif;font-size:46px;font-weight:700;color:#fff;line-height:1.1;margin:6px 0}
+.role-term.imposter{color:var(--red)}
+.role-fact-quote{position:relative;font-family:'Inter',sans-serif;font-size:20px;line-height:1.6;font-weight:500;font-style:italic;color:rgba(255,255,255,0.92);margin:8px 0;padding:18px 16px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+.role-hint{position:relative;font-size:13px;color:rgba(255,255,255,0.5);margin-top:18px;line-height:1.55}
+
+.cover-screen{position:relative;width:100%;max-width:380px;cursor:pointer}
+.cover-card{background:linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.03));border:1.5px solid rgba(255,255,255,0.14);border-radius:28px;padding:52px 26px;text-align:center;transition:all .2s ease;box-shadow:0 16px 50px rgba(0,0,0,0.3)}
+.cover-card:hover{background:linear-gradient(160deg,rgba(255,255,255,0.16),rgba(255,255,255,0.05));transform:translateY(-4px);box-shadow:0 22px 60px rgba(0,0,0,0.38);border-color:rgba(255,214,10,0.35)}
+.cover-icon{font-size:64px;margin-bottom:16px;display:block;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.4))}
+.cover-name{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:#fff;margin-bottom:8px}
+.cover-hint{font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:.5px}
+
+.timer-ring{position:relative;width:120px;height:120px;margin:0 auto 16px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:#fff}
+.timer-text.urgent{color:var(--red)}
+
+.result-card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px;width:100%;max-width:360px;text-align:center;margin-bottom:16px}
+.result-number{font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;color:var(--yellow);line-height:1}
+.result-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px}
+.result-term{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:var(--green-bright);margin:12px 0 4px}
+.result-term.result-fact{font-size:17px;font-family:'Inter',sans-serif;font-weight:500;line-height:1.5;color:rgba(255,255,255,0.9)}
+.divider{height:1px;background:rgba(255,255,255,0.1);margin:16px 0}
+
+.imposter-select-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.imposter-select-row span{font-size:15px;color:rgba(255,255,255,0.8)}
+
+.vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px;margin-bottom:16px}
+.vote-btn{background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:14px 8px;font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;color:#fff;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.vote-btn:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25)}
+.vote-btn.selected{background:rgba(230,57,70,0.2);border-color:var(--red);color:var(--red)}
+.vote-player-num{font-size:24px}
+
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.phase-badge{display:inline-block;padding:4px 14px;border-radius:50px;font-size:11px;font-family:'Oswald',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;background:rgba(255,214,10,0.15);color:var(--yellow);border:1px solid rgba(255,214,10,0.25)}
+
+.imposter-reveal{background:linear-gradient(135deg,rgba(230,57,70,0.15),rgba(230,57,70,0.05));border-color:rgba(230,57,70,0.3)}
+
+.emoji-big{font-size:64px;display:block;text-align:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="app" id="root"></div>
+
+<script>
+const WORDS = {
+  "Spieler": ["Lionel Messi","Cristiano Ronaldo","Neymar","Kylian Mbappé","Erling Haaland","Robert Lewandowski","Luka Modrić","Kevin De Bruyne","Mohamed Salah","Manuel Neuer","Thomas Müller","Toni Kroos","Harry Kane","Vinicius Jr","Jamal Musiala","Andrés Iniesta","Xavi Hernández","Sergio Ramos","Sergio Agüero","Zlatan Ibrahimović","Karim Benzema","Antoine Griezmann","Eden Hazard","Gareth Bale","Wayne Rooney","Steven Gerrard","Frank Lampard","Didier Drogba","Luis Suárez","Andrea Pirlo","Gianluigi Buffon","Philipp Lahm","Bastian Schweinsteiger","Mario Götze","Miroslav Klose","Mesut Özil","Paul Pogba","N'Golo Kanté","Virgil van Dijk","Sadio Mané","Son Heung-min","Jude Bellingham","Pedri","Joshua Kimmich","Marco Reus","Sergio Busquets","David Silva","Iker Casillas","Ronaldinho","Casemiro"],
+  "Regeln & Spielzug": ["Elfmeter","Abseits","Rote Karte","Gelbe Karte","Freistoß","Eckball","Einwurf","Kopfball","Dribbling","Verlängerung","Handspiel","Foul","Abstoß","Hackentrick","Fallrückzieher"],
+  "Stadien": [
+    "Signal Iduna Park","Allianz Arena","Olympiastadion Berlin","Olympiastadion München","Veltins-Arena","MHPArena","Volksparkstadion","Merkur Spiel-Arena","Borussia-Park","Deutsche Bank Park","RheinEnergieStadion","Max-Morlock-Stadion","Fritz-Walter-Stadion","Heinz-von-Heiden-Arena","Red Bull Arena","Weserstadion","Europa-Park Stadion","WWK Arena","Volkswagen Arena","PreZero Arena",
+    "Camp Nou","Santiago Bernabéu","Wembley","Old Trafford","San Siro","Maracanã","Anfield","Parc des Princes","Estadio Azteca","La Bombonera"
+  ],
+  "Deutschland": [
+    "FC Bayern München","Bayer 04 Leverkusen","Eintracht Frankfurt","Borussia Dortmund","RB Leipzig","SC Freiburg","VfB Stuttgart","Borussia Mönchengladbach","TSG 1899 Hoffenheim","Werder Bremen","FC Augsburg","1. FC Union Berlin","1. FSV Mainz 05","VfL Wolfsburg","1. FC Heidenheim","FC St. Pauli","1. FC Köln","Hamburger SV",
+    "Hertha BSC","FC Schalke 04","Hannover 96","Fortuna Düsseldorf","SpVgg Greuther Fürth","Karlsruher SC","SC Paderborn 07","1. FC Nürnberg","Eintracht Braunschweig","Hansa Rostock","1. FC Kaiserslautern","SSV Ulm 1846","1. FC Magdeburg","SV Elversberg","Preußen Münster","Jahn Regensburg","Holstein Kiel","VfL Bochum",
+    "SC Verl","MSV Duisburg","Rot-Weiss Essen","SV Wehen Wiesbaden","Dynamo Dresden","Energie Cottbus","FC Viktoria Köln","SV Sandhausen","FC Ingolstadt 04","TSV 1860 München","Arminia Bielefeld","VfL Osnabrück","1. FC Saarbrücken","SV Waldhof Mannheim","Hallescher FC","SC Freiburg II","Alemannia Aachen","FC Schweinfurt 05","SV Darmstadt 98","Borussia Dortmund II"
+  ],
+  "England": ["Liverpool FC","Arsenal FC","Manchester City","Chelsea FC","Newcastle United","Aston Villa","Nottingham Forest","Brighton & Hove Albion","Fulham FC","AFC Bournemouth","Brentford FC","Crystal Palace","Everton FC","West Ham United","Manchester United","Wolverhampton Wanderers","Tottenham Hotspur","Leeds United","Burnley FC","Sunderland AFC"]
+};
+
+const ALL_WORDS = Object.values(WORDS).flat();
+
+WORDS["Vereine"] = [...WORDS["Deutschland"], ...WORDS["England"]];
+
+const WM_SQUADS = {
+  "Mexiko": ["Guillermo Ochoa","Santiago Giménez","Raúl Jiménez","Edson Álvarez","César Huerta","Alexis Vega","Orbelín Pineda","Luis Chávez","Gilberto Mora","Julián Quiñones"],
+  "Südafrika": ["Ronwen Williams","Teboho Mokoena","Lyle Foster","Themba Zwane","Relebohile Mofokeng","Evidence Makgopa","Khuliso Mudau","Aubrey Modiba","Oswin Appollis","Iqraam Rayners"],
+  "Südkorea": ["Son Heung-min","Lee Kang-in","Kim Min-jae","Hwang Hee-chan","Hwang In-beom","Lee Jae-sung","Cho Gue-sung","Oh Hyeon-gyu","Kim Jin-gyu","Jo Hyeon-woo"],
+  "Tschechien": ["Patrik Schick","Tomáš Souček","Vladimír Coufal","Adam Hložek","Lukáš Provod","Ladislav Krejčí","Vladimír Darida","Robin Hranáč","David Zima","Pavel Šulc"],
+  "Kanada": ["Alphonso Davies","Jonathan David","Stephen Eustáquio","Tajon Buchanan","Cyle Larin","Ismaël Koné","Alistair Johnston","Jacob Shaffelburg","Richie Laryea","Jonathan Osorio"],
+  "Bosnien und Herzegowina": ["Edin Džeko","Sead Kolašinac","Ermedin Demirović","Amar Dedić","Nikola Katić","Benjamin Tahirović","Ivan Šunjić","Haris Tabaković","Esmir Bajraktarević","Dennis Hadžikadunić"],
+  "Katar": ["Akram Afif","Almoez Ali","Hassan Al-Haydos","Boualem Khoukhi","Karim Boudiaf","Pedro Miguel","Mohammed Muntari","Homam Al-Amin","Tarek Salman","Edmilson Junior"],
+  "Schweiz": ["Granit Xhaka","Manuel Akanji","Breel Embolo","Gregor Kobel","Remo Freuler","Ricardo Rodríguez","Denis Zakaria","Dan Ndoye","Zeki Amdouni","Ardon Jashari"],
+  "Brasilien": ["Vinícius Júnior","Neymar","Casemiro","Alisson","Marquinhos","Raphinha","Bruno Guimarães","Lucas Paquetá","Endrick","Gabriel Martinelli"],
+  "Marokko": ["Achraf Hakimi","Brahim Díaz","Bilal El Khannouss","Yassine Bounou","Sofyan Amrabat","Azzedine Ounahi","Nayef Aguerd","Noussair Mazraoui","Issa Diop","Abdessamad Ezzalzouli"],
+  "Haiti": ["Jean-Ricner Bellegarde","Wilson Isidor","Derrick Etienne","Frantzdy Pierrot","Duckens Nazon","Hannes Delcroix","Carlens Arcus","Johnny Placide","Josué Casimir","Ruben Providence"],
+  "Schottland": ["Andy Robertson","Scott McTominay","Kieran Tierney","John McGinn","Aaron Hickey","Lawrence Shankland","Ryan Christie","Che Adams","Ben Doak","Craig Gordon"],
+  "USA": ["Christian Pulisic","Weston McKennie","Tyler Adams","Folarin Balogun","Giovanni Reyna","Sergiño Dest","Timothy Weah","Antonee Robinson","Matt Turner","Brenden Aaronson"],
+  "Paraguay": ["Miguel Almirón","Julio Enciso","Omar Alderete","Gustavo Gómez","Antonio Sanabria","Diego Gómez","Ramón Sosa","Junior Alonso","Alex Arce","Gabriel Ávalos"],
+  "Australien": ["Mathew Ryan","Harry Souttar","Jackson Irvine","Connor Metcalfe","Aziz Behich","Nestory Irankunda","Awer Mabil","Mathew Leckie","Miloš Degenek","Cameron Burgess"],
+  "Türkei": ["Hakan Çalhanoğlu","Arda Güler","Kenan Yıldız","Merih Demiral","Ferdi Kadıoğlu","Kerem Aktürkoğlu","Çağlan Söyüncü","Salih Özcan","İrfan Can Kahveci","Orkun Kökçü"],
+  "Deutschland": ["Manuel Neuer","Jamal Musiala","Florian Wirtz","Kai Havertz","Leroy Sané","Leon Goretzka","Nick Woltemade","Angelo Stiller","Pascal Groß","Maximilian Beier"],
+  "Curaçao": ["Leandro Bacuna","Juninho Bacuna","Tahith Chong","Jürgen Locadia","Eloy Room","Armando Obispo","Joshua Brenet","Gervane Kastaneer","Sontje Hansen","Brandley Kuwas"],
+  "Elfenbeinküste": ["Franck Kessié","Wilfried Singo","Odilon Kossonou","Amad Diallo","Simon Adingra","Nicolas Pépé","Evan Ndicka","Ibrahim Sangaré","Seko Fofana","Ousmane Diomandé"],
+  "Ecuador": ["Moisés Caicedo","Piero Hincapié","Willian Pacho","Pervis Estupiñán","Enner Valencia","Kendry Páez","Alan Franco","Félix Torres","Jordy Alcívar","Kevin Rodríguez"],
+  "Niederlande": ["Virgil van Dijk","Memphis Depay","Frenkie de Jong","Cody Gakpo","Denzel Dumfries","Nathan Aké","Wout Weghorst","Tijjani Reijnders","Justin Kluivert","Donyell Malen"],
+  "Japan": ["Takefusa Kubo","Wataru Endo","Daichi Kamada","Ritsu Doan","Junya Ito","Takehiro Tomiyasu","Ko Itakura","Ao Tanaka","Ayase Ueda","Hiroki Ito"],
+  "Schweden": ["Alexander Isak","Viktor Gyökeres","Anthony Elanga","Victor Lindelöf","Lucas Bergvall","Yasin Ayari","Gustaf Nilsson","Benjamin Nygren","Carl Starfelt","Mattias Svanberg"],
+  "Tunesien": ["Ellyes Skhiri","Hannibal Mejbri","Anis Ben Slimane","Ali Abdi","Montassar Talbi","Dylan Bronn","Yan Valery","Elias Achouri","Firas Chaouat","Rani Khedira"],
+  "Belgien": ["Kevin De Bruyne","Romelu Lukaku","Thibaut Courtois","Jérémy Doku","Leandro Trossard","Youri Tielemans","Amadou Onana","Charles De Ketelaere","Axel Witsel","Arthur Theate"],
+  "Ägypten": ["Mohamed Salah","Omar Marmoush","Mahmoud Trezeguet","Emam Ashour","Ahmed Zizo","Rami Rabia","Mohamed Hany","Hamdy Fathy","Yasser Ibrahim","Mohamed El Shenawy"],
+  "Iran": ["Mehdi Taremi","Alireza Jahanbakhsh","Saman Ghoddos","Alireza Beiranvand","Ali Alipour","Saeid Ezatolahi","Mehdi Ghayedi","Rouzbeh Cheshmi","Ramin Rezaeian","Hossein Hosseini"],
+  "Neuseeland": ["Chris Wood","Kosta Barbarouses","Joe Bell","Marko Stamenić","Liberato Cacace","Alex Paulsen","Ben Waine","Sarpreet Singh","Tommy Smith","Michael Boxall"],
+  "Spanien": ["Lamine Yamal","Pedri","Rodri","Mikel Oyarzabal","Dani Olmo","Nico Williams","Aymeric Laporte","David Raya","Marc Cucurella","Ferran Torres"],
+  "Kap Verde": ["Ryan Mendes","Garry Rodrigues","Jovane Cabral","Stopira","Vozinha","Roberto Lopes","Logan Costa","Willy Semedo","Jamiro Monteiro","Kevin Pina"],
+  "Saudi-Arabien": ["Salem Al-Dawsari","Saleh Al-Shehri","Firas Al-Buraikan","Mohammed Kanno","Nasser Al-Dawsari","Abdullah Al-Khaibari","Mohammed Al-Owais","Ali Lajami","Saud Abdulhamid","Sultan Al-Ghannam"],
+  "Uruguay": ["Federico Valverde","Darwin Núñez","Ronald Araújo","Rodrigo Bentancur","Manuel Ugarte","Giorgian De Arrascaeta","Facundo Pellistri","José María Giménez","Sergio Rochet","Nicolás de la Cruz"],
+  "Frankreich": ["Kylian Mbappé","Ousmane Dembélé","Aurélien Tchouaméni","Mike Maignan","William Saliba","Adrien Rabiot","Marcus Thuram","Theo Hernández","Bradley Barcola","Désiré Doué"],
+  "Senegal": ["Sadio Mané","Kalidou Koulibaly","Nicolas Jackson","Idrissa Gueye","Édouard Mendy","Iliman Ndiaye","Pape Matar Sarr","Ismaïla Sarr","Habib Diarra","Krépin Diatta"],
+  "Irak": ["Ali Al-Hamadi","Aymen Hussein","Zidane Iqbal","Amir Al-Ammari","Ali Jassim","Frans Putros","Mustafa Saadoon","Hussein Ali","Akam Hashim","Youssef Amyn"],
+  "Norwegen": ["Erling Haaland","Martin Ødegaard","Alexander Sørloth","Antonio Nusa","Oscar Bobb","Julian Ryerson","Sander Berge","Kristoffer Ajer","Jørgen Strand Larsen","Andreas Schjelderup"],
+  "Argentinien": ["Lionel Messi","Julián Álvarez","Lautaro Martínez","Emiliano Martínez","Rodrigo De Paul","Enzo Fernández","Cristian Romero","Nicolás Otamendi","Alexis Mac Allister","Lisandro Martínez"],
+  "Algerien": ["Riyad Mahrez","Ramy Bensebaini","Rayan Aït-Nouri","Houssem Aouar","Aïssa Mandi","Amine Gouiri","Ibrahim Maza","Nabil Bentaleb","Mohamed Amine Amoura","Hicham Boudaoui"],
+  "Österreich": ["David Alaba","Marcel Sabitzer","Konrad Laimer","Marko Arnautović","Kevin Danso","Florian Grillitsch","Patrick Wimmer","Alexander Prass","Romano Schmid","Michael Gregoritsch"],
+  "Jordanien": ["Mousa Al-Tamari","Ali Olwan","Yazeed Abulaila","Noor Al-Rawabdeh","Mohammad Abu Zrayq","Ehsan Haddad","Yazan Al-Arab","Rajaei Ayed","Ibrahim Sabra","Anas Banawi"],
+  "Portugal": ["Cristiano Ronaldo","Bruno Fernandes","Bernardo Silva","Rúben Dias","João Cancelo","Rafael Leão","Vitinha","João Neves","Diogo Costa","João Félix"],
+  "DR Kongo": ["Chancel Mbemba","Aaron Wan-Bissaka","Yoane Wissa","Cédric Bakambu","Théo Bongonda","Arthur Masuaku","Gaël Kakuta","Meschack Elia","Fiston Mayele","Simon Banza"],
+  "Usbekistan": ["Eldor Shomurodov","Abdukodir Khusanov","Azizbek Amonov","Abbosbek Fayzullaev","Otabek Shukurov","Jaloliddin Masharipov","Igor Sergeev","Khojiakbar Alijonov","Akmal Mozgovoy","Sherzod Nasrullaev"],
+  "Kolumbien": ["James Rodríguez","Luis Díaz","Jhon Arias","Davinson Sánchez","Yerry Mina","Daniel Muñoz","Richard Ríos","Jefferson Lerma","Juan Fernando Quintero","Luis Suárez"],
+  "England": ["Harry Kane","Jude Bellingham","Bukayo Saka","Declan Rice","Marcus Rashford","Jordan Pickford","John Stones","Reece James","Kobbie Mainoo","Eberechi Eze"],
+  "Kroatien": ["Luka Modrić","Joško Gvardiol","Mateo Kovačić","Ivan Perišić","Andrej Kramarić","Dominik Livaković","Nikola Vlašić","Martin Baturina","Josip Šutalo","Luka Sučić"],
+  "Ghana": ["Thomas Partey","Iñaki Williams","Jordan Ayew","Antoine Semenyo","Ernest Nuamah","Kamaldeen Sulemana","Abdul Fatawu Issahaku","Baba Abdul Rahman","Lawrence Ati-Zigi","Abdul Mumin"],
+  "Panama": ["Adalberto Carrasquilla","Ismael Díaz","José Luis Rodríguez","Cecilio Waterman","Aníbal Godoy","Eric Davis","Fidel Escobar","Yoel Bárcenas","Alberto Quintero","Andrés Andrade"]
+};
+
+const WM_GROUPS = {
+  "Gruppe A": ["Mexiko","Südafrika","Südkorea","Tschechien"],
+  "Gruppe B": ["Kanada","Bosnien und Herzegowina","Katar","Schweiz"],
+  "Gruppe C": ["Brasilien","Marokko","Haiti","Schottland"],
+  "Gruppe D": ["USA","Paraguay","Australien","Türkei"],
+  "Gruppe E": ["Deutschland","Curaçao","Elfenbeinküste","Ecuador"],
+  "Gruppe F": ["Niederlande","Japan","Schweden","Tunesien"],
+  "Gruppe G": ["Belgien","Ägypten","Iran","Neuseeland"],
+  "Gruppe H": ["Spanien","Kap Verde","Saudi-Arabien","Uruguay"],
+  "Gruppe I": ["Frankreich","Senegal","Irak","Norwegen"],
+  "Gruppe J": ["Argentinien","Algerien","Österreich","Jordanien"],
+  "Gruppe K": ["Portugal","DR Kongo","Usbekistan","Kolumbien"],
+  "Gruppe L": ["England","Kroatien","Ghana","Panama"]
+};
+
+const wmGroupNodes = Object.entries(WM_GROUPS).map(([groupName,teams])=>{
+  const teamNodes=teams.map(team=>({key:"WM-"+team,label:team,words:WM_SQUADS[team]}));
+  return {key:"WM-"+groupName,label:groupName,words:teamNodes.flatMap(t=>t.words),children:teamNodes};
+});
+
+const wmNode = {key:"Weltmeisterschaft 2026",label:"Weltmeisterschaft 2026",words:wmGroupNodes.flatMap(g=>g.words),children:wmGroupNodes};
+
+const CATEGORY_TREE = [
+  {key:"Alle",label:"Alle",words:ALL_WORDS},
+  {key:"Spieler",label:"Spieler",words:WORDS["Spieler"],children:[wmNode]},
+  {key:"Regeln & Spielzug",label:"Regeln & Spielzug",words:WORDS["Regeln & Spielzug"]},
+  {key:"Stadien",label:"Stadien",words:WORDS["Stadien"]},
+  {key:"Vereine",label:"Vereine",words:WORDS["Vereine"],children:[
+    {key:"Deutschland",label:"Deutschland",words:WORDS["Deutschland"]},
+    {key:"England",label:"England",words:WORDS["England"]}
+  ]}
+];
+
+function registerCategoryWords(nodes){
+  nodes.forEach(n=>{
+    if(n.words) WORDS[n.key]=n.words;
+    if(n.children) registerCategoryWords(n.children);
+  });
+}
+registerCategoryWords(CATEGORY_TREE);
+
+function findCategoryNode(path){
+  let nodes=CATEGORY_TREE,node=null;
+  for(const key of path){
+    node=nodes.find(n=>n.key===key);
+    if(!node) return null;
+    nodes=node.children||[];
+  }
+  return node;
+}
+
+function categoryChildrenAt(path){
+  if(!path.length) return CATEGORY_TREE;
+  const node=findCategoryNode(path);
+  return node?(node.children||[]):[];
+}
+
+function categoryBreadcrumbs(path){
+  const labels=[]; let nodes=CATEGORY_TREE;
+  for(const key of path){
+    const node=nodes.find(n=>n.key===key);
+    if(!node) break;
+    labels.push(node.label);
+    nodes=node.children||[];
+  }
+  return labels;
+}
+
+function findCategoryPath(key,nodes=CATEGORY_TREE,path=[]){
+  for(const n of nodes){
+    const next=[...path,n.key];
+    if(n.key===key) return next;
+    if(n.children){
+      const found=findCategoryPath(key,n.children,next);
+      if(found) return found;
+    }
+  }
+  return null;
+}
+
+function navigateCategory(path){
+  const node=findCategoryNode(path);
+  if(!node) return;
+  const updates={catNav: node.children ? path : path.slice(0,-1)};
+  if(node.words) updates.category=node.key;
+  setState(updates);
+}
+
+function backCategory(){
+  setState({catNav:(state.catNav||[]).slice(0,-1)});
+}
+
+function categoryLabel(key){
+  const path=findCategoryPath(key);
+  const node=path?findCategoryNode(path):null;
+  return node?node.label:key;
+}
+
+const FACTS = [
+  "Ein Fußballspiel besteht aus zwei Halbzeiten von je 45 Minuten.",
+  "Die erste Fußball-Weltmeisterschaft fand 1930 in Uruguay statt.",
+  "Brasilien hat mit fünf Titeln die meisten Weltmeisterschaften gewonnen.",
+  "Ein Standardfußball besteht meist aus 12 Fünfecken und 20 Sechsecken.",
+  "Der Abstand zwischen den Torpfosten beträgt 7,32 Meter.",
+  "Pelé ist der einzige Spieler, der drei Weltmeistertitel gewonnen hat.",
+  "Gelbe und Rote Karten wurden erstmals bei der WM 1970 in Mexiko eingesetzt.",
+  "Ein Elfmeter wird aus 11 Metern Entfernung zum Tor geschossen.",
+  "Die englische Premier League wurde 1992 gegründet.",
+  "Lionel Messi hat den Ballon d'Or öfter gewonnen als jeder andere Spieler.",
+  "Cristiano Ronaldo ist der Rekordtorschütze der Champions-League-Geschichte.",
+  "Real Madrid hat die meisten Titel in der Champions League gewonnen.",
+  "Die Weltmeisterschaft 2026 findet erstmals in drei Ländern gleichzeitig statt: USA, Mexiko und Kanada.",
+  "Steht es nach 90 Minuten unentschieden, kann eine Verlängerung mit Elfmeterschießen folgen.",
+  "Diego Maradonas Tor bei der WM 1986 gegen England wird als 'Hand Gottes' bezeichnet.",
+  "Das schnellste Tor einer WM-Geschichte fiel nach nur elf Sekunden.",
+  "Ein Spielfeld muss laut FIFA-Regeln zwischen 90 und 120 Meter lang sein.",
+  "Der Videobeweis (VAR) wurde erstmals bei einer Weltmeisterschaft 2018 in Russland eingesetzt.",
+  "Manchester United ist Rekordmeister der englischen Liga.",
+  "Der FC Bayern München hat die meisten deutschen Meistertitel gewonnen.",
+  "Eine Fußballmannschaft besteht aus elf Spielern auf dem Feld.",
+  "Ein Eckstoß wird ausgeführt, wenn der Ball über die eigene Torauslinie ins Toraus geht.",
+  "Die Bundesliga wurde 1963 gegründet.",
+  "Miroslav Klose ist mit 16 Treffern der Rekordtorschütze bei Fußball-Weltmeisterschaften.",
+  "Beim Abseits muss ein Angreifer im Moment des Zuspiels näher am gegnerischen Tor stehen als der vorletzte Verteidiger.",
+  "Die Allianz Arena in München kann ihre Außenfassade in verschiedenen Farben beleuchten.",
+  "Frauen-Fußball-Weltmeisterschaften werden seit 1991 ausgetragen.",
+  "Der Begriff 'Catenaccio' beschreibt eine besonders defensive Spielweise aus Italien.",
+  "Der FC Liverpool trägt seine Heimspiele im legendären Stadion Anfield aus.",
+  "Das WM-Finale 1950 im Maracanã sahen schätzungsweise fast 200.000 Zuschauer.",
+  "Ein Spieler erhält eine Gelb-Rote Karte, wenn er im selben Spiel zweimal verwarnt wird.",
+  "Johan Cruyff gab einer berühmten Körpertäuschung seinen Namen: die Cruyff-Drehung.",
+  "Der englische Fußballverband The FA wurde bereits 1863 gegründet.",
+  "Real Madrid gewann mehrfach in Folge die Champions League in den 2010er- und 2020er-Jahren.",
+  "Im englischen Fußball wird ein Spiel zwischen rivalisierenden Stadtvereinen oft als 'Derby' bezeichnet.",
+  "Die Weltmeisterschaft 1974 in Deutschland gewann die deutsche Nationalmannschaft im eigenen Land.",
+  "Der FC Barcelona ist bekannt für seinen kombinationsstarken Spielstil 'Tiki-Taka'.",
+  "Ein Spiel wird von einem Schiedsrichter und zwei Linienrichtern (Assistenten) geleitet.",
+  "Robert Lewandowski stellte 2021 mit 41 Treffern einen neuen Bundesliga-Saisonrekord auf.",
+  "Ab der WM 2026 nehmen erstmals 48 statt 32 Mannschaften an der Endrunde teil.",
+  "Olympique Lyon hat mehr Titel in der Champions League der Frauen gewonnen als jeder andere Verein.",
+  "Das Wembley-Stadion in London bietet Platz für rund 90.000 Zuschauer.",
+  "Der argentinische Verein Boca Juniors trägt seine Heimspiele in der 'Bombonera' aus.",
+  "Diego Maradona führte Argentinien 1986 im Alleingang zum WM-Titel.",
+  "Xavi und Andrés Iniesta prägten über viele Jahre das Mittelfeldspiel des FC Barcelona.",
+  "Der Ballon d'Or wird seit 1956 jährlich an den besten Fußballer der Welt vergeben.",
+  "Ein Eigentor entsteht, wenn ein Spieler den Ball ins eigene Tor befördert.",
+  "Die Frauen-Bundesliga wurde 1990 als höchste deutsche Spielklasse im Frauenfußball eingeführt.",
+  "Der FC Bayern München gewann 2013 als erster deutscher Verein das Triple aus Meisterschaft, Pokal und Champions League.",
+  "Kylian Mbappé erzielte im WM-Finale 2022 einen Hattrick, verlor das Spiel aber im Elfmeterschießen.",
+  "Der FC Bayern München und Borussia Dortmund tragen den 'Klassiker' der Bundesliga aus.",
+  "Die Copa América ist der älteste noch ausgetragene Kontinentalwettbewerb im Fußball.",
+  "Der AC Mailand und Inter Mailand teilen sich das Stadion Giuseppe Meazza in San Siro.",
+  "Zinédine Zidane wurde im WM-Finale 2006 nach einem Kopfstoß gegen Marco Materazzi vom Platz gestellt.",
+  "Der FC Liverpool gewann 2005 die Champions League nach einem 0:3-Rückstand zur Halbzeit gegen den AC Mailand.",
+  "Gerd Müller erzielte 1972 in einer Bundesliga-Saison 40 Tore – ein Rekord, der über vier Jahrzehnte hielt.",
+  "Die Niederlande gilt als die beste Mannschaft, die nie Weltmeister wurde.",
+  "Der portugiesische Verein Benfica Lissabon spielt im Estádio da Luz.",
+  "England wurde 1966 im eigenen Land erstmals und bislang einzig Weltmeister.",
+  "Der spanische Verein FC Sevilla hält mit sieben Titeln den Rekord für die meisten Europa-League-Siege.",
+  "Franz Beckenbauer gewann die Weltmeisterschaft sowohl als Spieler (1974) als auch als Trainer (1990).",
+  "Eine Halbzeitpause im Fußball dauert in der Regel 15 Minuten.",
+  "Der Begriff 'Hattrick' bezeichnet drei Tore eines einzelnen Spielers in einem Spiel.",
+  "Die niederländische Nationalmannschaft wird wegen ihrer orangefarbenen Trikots 'Oranje' genannt.",
+  "Der Confederations Cup diente früher als Generalprobe für die Fußball-Weltmeisterschaft.",
+  "Frankreich wurde 1998 im eigenen Land zum ersten Mal Weltmeister.",
+  "Der VfL Wolfsburg gewann 2009 überraschend seine bislang einzige deutsche Meisterschaft.",
+  "Andrés Iniesta erzielte das entscheidende Tor im WM-Finale 2010 gegen die Niederlande.",
+  "Seit 2022 dürfen Trainer in den meisten Wettbewerben bis zu fünf Spieler pro Spiel auswechseln.",
+  "Der italienische Verein Juventus Turin trägt den Spitznamen 'die alte Dame'.",
+  "Pep Guardiola gewann mit drei verschiedenen Vereinen die Meisterschaft in drei verschiedenen Ligen.",
+  "Der schottische Verein Celtic Glasgow gewann 1967 als erster britischer Klub den Europapokal der Landesmeister.",
+  "Bei der WM 1954 gelang der deutschen Mannschaft das 'Wunder von Bern'.",
+  "Der senegalesische Stürmer Sadio Mané wurde mit dem FC Liverpool Champions-League-Sieger.",
+  "Der Begriff 'Gegenpressing' beschreibt das sofortige Zurückerobern des Balls direkt nach einem Ballverlust.",
+  "Die deutsche Nationalmannschaft gewann 2014 in Brasilien ihren vierten WM-Titel.",
+  "Thomas Müller prägte für seine ungewöhnliche Spielweise selbst den Begriff 'Raumdeuter'.",
+  "Eintracht Frankfurt gewann 2022 die Europa League nach einem Elfmeterschießen gegen die Glasgow Rangers.",
+  "Der argentinische Verein River Plate trägt den Spitznamen 'Los Millonarios'.",
+  "Beim Elfmeterschießen schießt zunächst jede Mannschaft fünf Elfmeter, danach geht es im K.-o.-Modus weiter.",
+  "Die Fußball-Europameisterschaft wird seit 1960 alle vier Jahre ausgetragen.",
+  "Marta wurde sechsmal zur Weltfußballerin des Jahres gewählt und gilt als Ikone des Frauenfußballs.",
+  "Der FC Porto gewann 2004 unter Trainer José Mourinho überraschend die Champions League.",
+  "Der Begriff 'Tunnel' beschreibt das Durchspielen des Balls zwischen den Beinen eines Gegenspielers.",
+  "Der SSC Neapel gewann 2023 erstmals seit 1990 wieder die italienische Meisterschaft.",
+  "Zlatan Ibrahimović spielte im Laufe seiner Karriere in sechs verschiedenen europäischen Top-Ligen.",
+  "Der Ball muss bei einem Anstoß zunächst in die gegnerische Spielhälfte rollen, bevor ein Mitspieler ihn berühren darf.",
+  "Der niederländische Trainer Rinus Michels gilt als Erfinder des 'Totaalvoetbal'.",
+  "Der FC Chelsea gewann unter dem russischen Investor Roman Abramowitsch zahlreiche nationale und internationale Titel.",
+  "Der spanische Verein Atlético Madrid trägt den Spitznamen 'Los Colchoneros'.",
+  "Die WM 2010 in Südafrika war die erste Weltmeisterschaft auf dem afrikanischen Kontinent.",
+  "Beim Doppelpass spielen sich zwei Mitspieler den Ball schnell hintereinander zu, um einen Gegner zu überspielen.",
+  "Der ungarische Stürmer Ferenc Puskás gilt als einer der besten Torjäger der Fußballgeschichte.",
+  "Der englische Verein Leicester City gewann 2016 völlig überraschend die Premier League.",
+  "Der deutsche Torwart Manuel Neuer gilt als Pionier des modernen 'Liberos im Tor'.",
+  "Die Copa Libertadores ist der bedeutendste Vereinswettbewerb Südamerikas.",
+  "Der Begriff 'Fallrückzieher' beschreibt einen akrobatischen Torschuss im Rückwärtssprung.",
+  "Der walisische Stürmer Gareth Bale wechselte 2013 für eine damalige Rekordablöse zu Real Madrid.",
+  "Bei einem Foulelfmeter darf der ausführende Spieler den Ball nicht zweimal hintereinander berühren, bevor ein anderer Spieler ihn spielt.",
+  "Megan Rapinoe wurde mit der US-amerikanischen Nationalmannschaft zweimal Weltmeisterin."
+];
+
+function getWords(cat){
+  if(cat==="Alle") return ALL_WORDS;
+  return WORDS[cat]||ALL_WORDS;
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function playerName(i){
+  return (state.playerNames&&state.playerNames[i])||("Spieler "+(i+1));
+}
+
+let state = {
+  screen:"setup",
+  setupStep:0,
+  gameMode:"imposter",
+  players:4,
+  playerNames:[],
+  category:"Alle",
+  catNav:[],
+  imposterIndex:0,
+  secretWord:"",
+  playerFacts:[],
+  currentPlayer:0,
+  revealed:false,
+  timeLeft:180,
+  timerRunning:false,
+  voteSelected:null,
+  resolved:false
+};
+
+let timerInterval=null;
+
+function setState(updates){
+  Object.assign(state,updates);
+  render();
+}
+
+function goToNamesStep(){
+  const names=Array.from({length:state.players},(_,i)=>state.playerNames[i]||"");
+  setState({playerNames:names,setupStep:2});
+}
+
+function updatePlayerName(i,value){
+  state.playerNames[i]=value;
+}
+
+function proceedFromNames(){
+  const names=state.playerNames.map((n,i)=>(n&&n.trim())?n.trim():"Spieler "+(i+1));
+  state.playerNames=names;
+  if(state.gameMode==="faktenchecker"){
+    startGame();
+  } else {
+    const fullPath=findCategoryPath(state.category)||[];
+    setState({setupStep:3,catNav:fullPath.slice(0,-1)});
+  }
+}
+
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startGame(){
+  const isFC=state.gameMode==="faktenchecker";
+  const odd=Math.floor(Math.random()*state.players);
+  const base={screen:"roles",imposterIndex:odd,currentPlayer:0,revealed:false,timeLeft:180,timerRunning:false,voteSelected:null,resolved:false};
+  if(isFC){
+    const picked=shuffleArray(FACTS).slice(0,state.players-1);
+    let fi=0;
+    const playerFacts=Array.from({length:state.players},(_,i)=>i===odd?null:picked[fi++]);
+    setState({...base,playerFacts,secretWord:""});
+  } else {
+    const words=getWords(state.category);
+    const word=words[Math.floor(Math.random()*words.length)];
+    setState({...base,secretWord:word,playerFacts:[]});
+  }
+}
+
+function startTimer(){
+  if(timerInterval)clearInterval(timerInterval);
+  setState({timerRunning:true});
+  timerInterval=setInterval(()=>{
+    if(state.timeLeft<=1){
+      clearInterval(timerInterval);
+      setState({timeLeft:0,timerRunning:false});
+    } else {
+      state.timeLeft--;
+      document.getElementById("timer-val")&&(document.getElementById("timer-val").textContent=formatTime(state.timeLeft));
+      document.getElementById("timer-val")&&(document.getElementById("timer-val").className="timer-text"+(state.timeLeft<=30?" urgent":""));
+      updateTimerRing();
+    }
+  },1000);
+}
+
+function formatTime(s){
+  return Math.floor(s/60)+":"+(s%60<10?"0":"")+s%60;
+}
+
+function updateTimerRing(){
+  const el=document.getElementById("timer-arc");
+  if(!el)return;
+  const pct=state.timeLeft/180;
+  const r=50,circ=2*Math.PI*r;
+  el.setAttribute("stroke-dashoffset",circ*(1-pct));
+  el.setAttribute("stroke",state.timeLeft<=30?"#e63946":"#52b788");
+}
+
+function reveal(){setState({revealed:true})}
+
+function next(){
+  const next=state.currentPlayer+1;
+  if(next>=state.players){
+    setState({screen:"game",currentPlayer:0});
+  } else {
+    setState({currentPlayer:next,revealed:false});
+  }
+}
+
+function goVote(){
+  clearInterval(timerInterval);
+  setState({screen:"vote"});
+}
+
+function selectVote(i){setState({voteSelected:i})}
+
+function resolve(){
+  if(state.voteSelected===null)return;
+  setState({screen:"result"});
+}
+
+function newGame(){setState({screen:"setup",setupStep:0,catNav:[]})}
+
+function pips(total,current,done){
+  let h="";
+  for(let i=0;i<total;i++){
+    let cls="pip";
+    if(i<done)cls+=" done";
+    else if(i===current)cls+=" current";
+    h+=`<div class="${cls}"></div>`;
+  }
+  return h;
+}
+
+function renderSetup(){
+  if(state.setupStep===1) return renderSetupCount();
+  if(state.setupStep===2) return renderSetupNames();
+  if(state.setupStep===3) return renderSetupCategory();
+  return renderSetupMode();
+}
+
+function renderSetupMode(){
+  const modes=[
+    {key:"imposter",icon:"🎭",title:"Imposter",desc:"Fast alle kennen denselben Begriff. Eine Person — der Imposter — kennt ihn nicht und muss bluffen, ohne aufzufliegen."},
+    {key:"faktenchecker",icon:"🤥",title:"Faktenchecker",desc:"Fast alle bekommen einen echten Fußball-Fakt. Der Lügner bekommt keinen und muss sich spontan einen ausdenken — und glaubwürdig vortragen."}
+  ];
+  return `
+<div class="screen fade-in">
+  <div class="title-badge">Social Deduction Game</div>
+  <h1>FUSSBALL<br><span>IMPOSTER</span></h1>
+  <p class="subtitle">Wähle einen Spielmodus</p>
+
+  ${modes.map(m=>`
+    <div class="card mode-card${state.gameMode===m.key?" active":""}" onclick="setState({gameMode:'${m.key}'})">
+      <span class="mode-icon">${m.icon}</span>
+      <div>
+        <div class="label">${m.title}</div>
+        <p>${m.desc}</p>
+      </div>
+    </div>
+  `).join("")}
+
+  <button class="btn-primary" onclick="setState({setupStep:1})">Weiter</button>
+</div>`;
+}
+
+function renderSetupCount(){
+  return `
+<div class="screen fade-in">
+  <div class="title-badge">Social Deduction Game</div>
+  <h2 style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px">Wie viele seid ihr?</h2>
+  <p class="subtitle">Wählt eure Spieleranzahl</p>
+
+  <div class="card">
+    <div class="label">Wie viele Spieler sind es?</div>
+    <div class="stepper">
+      <button onclick="if(state.players>3)setState({players:state.players-1})">−</button>
+      <div class="val">${state.players}</div>
+      <button onclick="if(state.players<10)setState({players:state.players+1})">+</button>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="goToNamesStep()">Weiter</button>
+  <button class="btn-secondary" onclick="setState({setupStep:0})" style="margin-top:10px">← Zurück</button>
+</div>`;
+}
+
+function renderSetupNames(){
+  return `
+<div class="screen fade-in">
+  <div class="title-badge">Social Deduction Game</div>
+  <h2 style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px">Wie heißt ihr?</h2>
+  <p class="subtitle">Trag die Namen der ${state.players} Spieler ein</p>
+
+  <div class="card">
+    ${Array.from({length:state.players},(_,i)=>`
+      <div class="name-input-row">
+        <label>Spieler ${i+1}</label>
+        <input class="name-input" type="text" maxlength="20" value="${esc(state.playerNames[i]||"")}" placeholder="Spieler ${i+1}" oninput="updatePlayerName(${i},this.value)">
+      </div>
+    `).join("")}
+  </div>
+
+  <button class="btn-primary" onclick="proceedFromNames()">${state.gameMode==="faktenchecker"?"⚽ Spiel starten":"Weiter"}</button>
+  <button class="btn-secondary" onclick="setState({setupStep:1})" style="margin-top:10px">← Zurück</button>
+</div>`;
+}
+
+function renderSetupCategory(){
+  const path=state.catNav||[];
+  const levelNodes=categoryChildrenAt(path);
+  const crumbs=categoryBreadcrumbs(path);
+  return `
+<div class="screen fade-in">
+  <div class="title-badge">Social Deduction Game</div>
+  <h2 style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px">Worum geht's?</h2>
+  <p class="subtitle">${crumbs.length?esc(crumbs.join(" › ")):"Wähle eine Kategorie"}</p>
+
+  <div class="card">
+    <div class="label">Kategorie</div>
+    <div class="cat-grid">
+      ${levelNodes.map(n=>{
+        const childPath=[...path,n.key];
+        const active=state.category===n.key;
+        return `<div class="cat-btn${active?" active":""}" onclick='navigateCategory(${JSON.stringify(childPath)})'>${esc(n.label)}${n.children?" ›":""}</div>`;
+      }).join("")}
+    </div>
+    ${path.length?`<button class="btn-secondary" onclick="backCategory()" style="margin-top:10px">← Eine Ebene zurück</button>`:""}
+  </div>
+
+  <button class="btn-primary" onclick="startGame()">⚽ Spiel starten</button>
+  <button class="btn-secondary" onclick="setState({setupStep:2})" style="margin-top:10px">← Zurück zu den Namen</button>
+</div>`;
+}
+
+function renderRoles(){
+  const isLast=state.currentPlayer===state.players-1;
+  if(!state.revealed){
+    return `
+<div class="screen fade-in">
+  <div class="phase-badge">Rollenverteilung</div>
+  <div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;justify-content:center">
+    ${Array.from({length:state.players},(_,i)=>`<div class="pip${i<state.currentPlayer?" done":i===state.currentPlayer?" current":""}"></div>`).join("")}
+  </div>
+
+  <div class="cover-screen">
+    <div class="cover-card" onclick="reveal()">
+      <span class="cover-icon">🔒</span>
+      <div class="cover-name">${esc(playerName(state.currentPlayer))}</div>
+      <div class="cover-hint">Antippen um Rolle zu sehen</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:20px;text-align:center">Niemand sonst darf zuschauen</p>
+</div>`;
+  } else {
+    const isFC=state.gameMode==="faktenchecker";
+    const isOdd=state.currentPlayer===state.imposterIndex;
+    const showFact=isFC&&!isOdd;
+    const icon=isOdd?(isFC?"🤥":"🎭"):(isFC?"🧠":"🕵️");
+    const tag=isOdd?(isFC?"Lügner":"Imposter"):(isFC?"Faktenchecker":"Mitspieler");
+    const term=isOdd
+      ?(isFC?"Du bist der<br>Lügner!":"Du bist der<br>Imposter!")
+      :(isFC?`„${esc(state.playerFacts[state.currentPlayer])}"`:esc(state.secretWord));
+    const hint=isOdd
+      ?(isFC?"Denk dir spontan einen<br>glaubwürdigen Fußball-Fakt aus!":"Finde heraus worum es geht<br>und bleib unentdeckt!")
+      :(isFC?"Trag deinen Fakt so vor,<br>als wäre es dein eigenes Wissen.":"Beschreibe den Begriff mit<br>einem einzigen Wort — ohne ihn zu sagen.");
+    return `
+<div class="screen fade-in">
+  <div class="phase-badge">Nur du siehst das</div>
+  <div class="role-card ${isOdd?"imposter":"normal"}">
+    <span class="role-icon-big">${icon}</span>
+    <span class="role-tag ${isOdd?"imposter":"normal"}">${tag}</span>
+    ${showFact
+      ?`<div class="role-fact-quote">${term}</div>`
+      :`<div class="role-term ${isOdd?"imposter":""}">${term}</div>`}
+    <p class="role-hint">${hint}</p>
+  </div>
+
+  <button class="btn-primary" onclick="next()">${isLast?"🏁 Alle haben ihre Rolle":"✓ Verstanden, weitergeben"}</button>
+</div>`;
+  }
+}
+
+function renderGame(){
+  const mins=Math.floor(state.timeLeft/60);
+  const secs=state.timeLeft%60;
+  const r=50,circ=2*Math.PI*r;
+  const pct=state.timeLeft/180;
+  const isFC=state.gameMode==="faktenchecker";
+  return `
+<div class="screen fade-in">
+  <div class="phase-badge">Spielphase</div>
+  <h2 style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px">Das Spiel beginnt!</h2>
+  <p style="font-size:13px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:28px">${isFC?`Reihum: Jeder nennt <strong style="color:#fff">seinen Fußball-Fakt</strong> — der Lügner muss improvisieren`:`Reihum: Jeder sagt <strong style="color:#fff">ein Wort</strong>, das den Begriff beschreibt`}</p>
+
+  <div class="timer-ring">
+    <svg width="120" height="120" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+      <circle id="timer-arc" cx="60" cy="60" r="${r}" fill="none" stroke="#52b788" stroke-width="8"
+        stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"
+        stroke-linecap="round" style="transition:stroke-dashoffset .9s linear"/>
+    </svg>
+    <div class="timer-text${state.timeLeft<=30?" urgent":""}" id="timer-val">${formatTime(state.timeLeft)}</div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:32px">
+    ${!state.timerRunning&&state.timeLeft===180?`<button class="btn-secondary" onclick="startTimer()" style="flex:1">▶ Timer starten</button>`:""}
+    ${state.timerRunning?`<button class="btn-secondary" onclick="clearInterval(timerInterval);setState({timerRunning:false})" style="flex:1">⏸ Pause</button>`:""}
+    ${!state.timerRunning&&state.timeLeft<180&&state.timeLeft>0?`<button class="btn-secondary" onclick="startTimer()" style="flex:1">▶ Weiter</button>`:""}
+  </div>
+
+  <button class="btn-primary btn-red" onclick="goVote()">🗳 Abstimmung starten</button>
+</div>`;
+}
+
+function renderVote(){
+  const isFC=state.gameMode==="faktenchecker";
+  return `
+<div class="screen fade-in">
+  <div class="phase-badge">Abstimmung</div>
+  <h2 style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px">${isFC?"Wer ist der Lügner?":"Wer ist der Imposter?"}</h2>
+  <p style="font-size:13px;color:rgba(255,255,255,0.5);text-align:center;margin-bottom:24px">Mehrheitsentscheid — dann auflösen</p>
+
+  <div class="vote-grid">
+    ${Array.from({length:state.players},(_,i)=>`
+      <button class="vote-btn${state.voteSelected===i?" selected":""}" onclick="selectVote(${i})">
+        <span class="vote-player-num">👤</span>
+        ${esc(playerName(i))}
+      </button>
+    `).join("")}
+  </div>
+
+  <button class="btn-primary${state.voteSelected===null?" ":" btn-red"}" onclick="resolve()" style="${state.voteSelected===null?"opacity:.4;pointer-events:none":""}">🔍 Auflösen</button>
+</div>`;
+}
+
+function renderResult(){
+  const correct=state.voteSelected===state.imposterIndex;
+  const isFC=state.gameMode==="faktenchecker";
+  return `
+<div class="screen fade-in">
+  <div class="phase-badge">Auflösung</div>
+  <span class="emoji-big">${correct?"🎉":"😱"}</span>
+
+  <div class="result-card${correct?"":" imposter-reveal"}">
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:8px">${isFC?"Der Lügner war":"Der Imposter war"}</p>
+    <div class="result-number">${esc(playerName(state.imposterIndex))}</div>
+    <div style="display:flex;justify-content:center;margin-top:12px">
+      <span class="role-tag imposter">${correct?"✓ Richtig erkannt":"✗ Falsch geraten"}</span>
+    </div>
+  </div>
+
+  <div class="result-card" style="${isFC?"text-align:left":""}">
+    ${isFC?`
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px;text-align:center">Das waren die echten Fakten</p>
+    ${Array.from({length:state.players},(_,i)=>i===state.imposterIndex?"":`
+      <div style="margin-bottom:10px">
+        <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.5px;color:var(--yellow);margin-bottom:2px">${esc(playerName(i))}</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.85);line-height:1.45">${esc(state.playerFacts[i])}</div>
+      </div>
+    `).join("")}
+    `:`
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px">Das gesuchte Wort war</p>
+    <div class="result-term">${esc(state.secretWord)}</div>
+    <p style="font-size:12px;color:rgba(255,255,255,0.35)">Kategorie: ${esc(categoryLabel(state.category))}</p>
+    `}
+  </div>
+
+  <button class="btn-primary" onclick="newGame()">🔄 Neues Spiel</button>
+</div>`;
+}
+
+function render(){
+  const root=document.getElementById("root");
+  if(!root)return;
+  switch(state.screen){
+    case"setup":root.innerHTML=renderSetup();break;
+    case"roles":root.innerHTML=renderRoles();break;
+    case"game":root.innerHTML=renderGame();if(state.timerRunning)updateTimerRing();break;
+    case"vote":root.innerHTML=renderVote();break;
+    case"result":root.innerHTML=renderResult();break;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
